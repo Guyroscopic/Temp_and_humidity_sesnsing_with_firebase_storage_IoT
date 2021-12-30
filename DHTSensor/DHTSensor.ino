@@ -1,28 +1,32 @@
-#include <DHT.h>
+#include <FirebaseESP8266.h>
 #include <Adafruit_Sensor.h>
 #include <ESP8266WiFi.h>
-#include <FirebaseESP8266.h>
+#include <DHT.h>
+
+//DHT11 sensor Settings
 #define DHTPIN 5
 #define DHTTYPE DHT11
-DHT dht(DHTPIN, DHTTYPE);
 
-WiFiClient client;    
- 
-const char *ssid =  "Guyro";     // Keep your Wi-Fi Username
-const char *pass =  "rafey2000";     // Keep your Wi-Fi Password
-
-//Firebase settings
+//Firebase Settings
 #define FIREBASE_HOST "iot-project-183-default-rtdb.firebaseio.com"
 #define FIREBASE_AUTH "PqlYOSHG7pVeJpOa7eoOy4aA8ycHFnv4m8bKvmRs"
 
-FirebaseData firebaseData;
+//Defining DHT, WiFi and Firebase objects
+DHT dht(DHTPIN, DHTTYPE);
+WiFiClient client;
+FirebaseData firebaseData;   
+
+
+//Getway WiFi Credentials
+const char *ssid =  "Guyro";         //Wi-Fi Username
+const char *pass =  "rafey2000";     //Wi-Fi Password
 
 
 void setup(void)
 {
   Serial.begin(9600);
 
-  //Setting up WiFi
+  //Initializing up WiFi
   Serial.print("Connecting");
   Serial.print("WiFi...");
   delay(2000);
@@ -30,7 +34,7 @@ void setup(void)
   Serial.println(ssid);
   WiFi.begin(ssid, pass);
 
-  //Setting up Firebase
+  //Initializing up Firebase
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
   while (WiFi.status() != WL_CONNECTED) 
   {
@@ -42,23 +46,34 @@ void setup(void)
   delay(2000);
   Serial.println("Initializing...");
 
-  //Setting up DHT sendor
+  //Initializing up DHT sensor
   dht.begin();
 }
+
 void loop(void)
 {
-  float tempC = dht.readTemperature();
+
+  //Reading temp and humidity from DHT sensor
+  float tempC    = dht.readTemperature();
   float humidity = dht.readHumidity();
 
+  //Printing on Serial monitor
   Serial.print("Temperature C: ");
   Serial.print(tempC);
   Serial.println();
 
   Serial.print("Humidity: ");
   Serial.print(humidity);Serial.print("%");
-  Firebase.pushInt(firebaseData, "/Temperature", tempC);
-  Firebase.pushInt(firebaseData, "/Humidity", humidity);
+
+  //Sending data to Firebase real-time data storage
+//  Firebase.pushInt(firebaseData, "/Temperature", tempC);
+//  Firebase.pushInt(firebaseData, "/Humidity"   , humidity);
+
+  Firebase.pushFloat(firebaseData, "/Temperature", tempC);
+  Firebase.pushFloat(firebaseData, "/Humidity"   , humidity);
+  
   Serial.println();
 
-  delay(500);
+  //Wating 1 secind before taking next reading
+  delay(1000);
 }
