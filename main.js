@@ -9,19 +9,26 @@ const firebaseConfig = {
   };
 const app = firebase.initializeApp(firebaseConfig);
 var database = firebase.database();
-database.ref('Humidity').once('value',(snapshot)=>{
+database.ref().once('value',(snapshot)=>{
     document.getElementById("allGraphs").style.display = "block";
     document.getElementById("loader").style.display = "none";
-    fetchedData = Object.values(snapshot.val());
-    console.log(fetchedData);
-    lineChart(fetchedData, 'humidityChart', "Humidity");
-    barChart(fetchedData, 'humidityBarChart', "Humidity");
+    var fetchedDataHumidityArr = new Array();
+    Object.values(snapshot.val().data).forEach((value)=>{
+        fetchedDataHumidityArr.push(value.humidity)
+        }
+    );
+
+    lineChart(fetchedDataHumidityArr, 'humidityChart', "Humidity");
+    barChart(fetchedDataHumidityArr, 'humidityBarChart', "Humidity");
 })
-database.ref('Temperature').once('value',(snapshot)=>{
-    fetchedData = Object.values(snapshot.val());
-    console.log(fetchedData);
-    lineChart(fetchedData, 'temperatureChart', 'Temperature');
-    barChart(fetchedData, 'temperatureBarChart', 'Temperature');
+database.ref().once('value',(snapshot)=>{
+    var fetchedDataTempArr = new Array();
+    Object.values(snapshot.val().data).forEach((value)=>{
+        fetchedDataTempArr.push(value.temp)
+        }
+    );
+    lineChart(fetchedDataTempArr, 'temperatureChart', 'Temperature');
+    barChart(fetchedDataTempArr, 'temperatureBarChart', 'Temperature');
 })
 function lineChart(fetchedData, id,label) {
         const ctx = document.getElementById(id).getContext('2d');
