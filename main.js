@@ -12,30 +12,42 @@ var database = firebase.database();
 database.ref().once('value',(snapshot)=>{
     document.getElementById("allGraphs").style.display = "block";
     document.getElementById("loader").style.display = "none";
+    
+    timeArray = new Array();
+    Object.values(snapshot.val().data).forEach((value)=>{
+        timeArray.push(new Date(value.timestamp).toLocaleString("en-US"));
+        }
+    );
     var fetchedDataHumidityArr = new Array();
     Object.values(snapshot.val().data).forEach((value)=>{
         fetchedDataHumidityArr.push(value.humidity)
         }
     );
 
-    lineChart(fetchedDataHumidityArr, 'humidityChart', "Humidity");
-    barChart(fetchedDataHumidityArr, 'humidityBarChart', "Humidity");
+    lineChart(fetchedDataHumidityArr, timeArray, 'humidityChart', "Humidity");
+    barChart(fetchedDataHumidityArr,timeArray, 'humidityBarChart', "Humidity");
 })
 database.ref().once('value',(snapshot)=>{
+    timeArray = new Array();
+    Object.values(snapshot.val().data).forEach((value)=>{
+        timeArray.push(new Date(value.timestamp).toLocaleString("en-US"));
+        }
+    );
+
     var fetchedDataTempArr = new Array();
     Object.values(snapshot.val().data).forEach((value)=>{
         fetchedDataTempArr.push(value.temp)
         }
     );
-    lineChart(fetchedDataTempArr, 'temperatureChart', 'Temperature');
-    barChart(fetchedDataTempArr, 'temperatureBarChart', 'Temperature');
+    lineChart(fetchedDataTempArr,timeArray, 'temperatureChart', 'Temperature');
+    barChart(fetchedDataTempArr,timeArray, 'temperatureBarChart', 'Temperature');
 })
-function lineChart(fetchedData, id,label) {
+function lineChart(fetchedData, timeArray, id,label) {
         const ctx = document.getElementById(id).getContext('2d');
         const myChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: Array.from(Array(Object.keys(fetchedData).length).keys()),
+                labels: timeArray,
                 datasets: [{
                     label: label,
                     data: fetchedData,
@@ -61,12 +73,13 @@ function lineChart(fetchedData, id,label) {
         });
 }
 
-function barChart(fetchedData, id,label) {
+function barChart(fetchedData, timeArray, id,label) {
+    console.log(timeArray);
     const ctx = document.getElementById(id).getContext('2d');
     const myChart = new Chart(ctx, {
-        type: 'scatter',
+        type: 'bar',
         data: {
-            labels: Array.from(Array(Object.keys(fetchedData).length).keys()),
+            labels: timeArray,
             datasets: [{
                 label: label,
                 data: fetchedData,
